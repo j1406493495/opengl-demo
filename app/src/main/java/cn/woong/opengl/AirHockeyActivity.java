@@ -3,9 +3,8 @@ package cn.woong.opengl;
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.widget.TextView;
 
-public class MainActivity extends Activity {
+public class AirHockeyActivity extends Activity {
     private GLSurfaceView mGLSurfaceView;
     private boolean mRender;
 
@@ -18,7 +17,7 @@ public class MainActivity extends Activity {
         mGLSurfaceView.setEGLContextClientVersion(2);
 
 //        mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        mGLSurfaceView.setRenderer(new MainRenderer());
+        mGLSurfaceView.setRenderer(new AirHockeyRenderer(this));
         mRender = true;
 
         setContentView(mGLSurfaceView);
