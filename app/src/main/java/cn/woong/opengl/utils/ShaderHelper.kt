@@ -57,6 +57,7 @@ object ShaderHelper {
         GLES20.glAttachShader(programObjectId, fragmentShaderId)
 
         GLES20.glLinkProgram(programObjectId)
+
         val linkStatus = IntArray(1)
         GLES20.glGetProgramiv(programObjectId, GLES20.GL_LINK_STATUS, linkStatus, 0)
         LogUtils.i("Results of linking program ${GLES20.glGetProgramInfoLog(programObjectId)}")
@@ -68,5 +69,18 @@ object ShaderHelper {
         }
 
         return programObjectId
+    }
+
+    /**
+     * 检测 program 是否有效
+     */
+    fun validateProgram(programObjectId: Int): Boolean {
+        GLES20.glValidateProgram(programObjectId)
+
+        val validateState = IntArray(1)
+        GLES20.glGetProgramiv(programObjectId, GLES20.GL_VALIDATE_STATUS, validateState, 0)
+        LogUtils.i("Results of validating program ${GLES20.glGetProgramInfoLog(programObjectId)}")
+
+        return validateState[0] != 0
     }
 }

@@ -21,7 +21,7 @@ object TextResourceReader {
             while (nextLine != null) {
                 nextLine = bufferedReader.readLine()
                 builder.append(nextLine)
-                builder.append('\n')
+                builder.append("\n")
             }
         } catch (ioException: IOException) {
             throw RuntimeException("Can not open resource: $resourceId", ioException)

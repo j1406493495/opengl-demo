@@ -1,8 +1,13 @@
 package cn.woong.opengl
 
 import android.app.Activity
+import android.app.ActivityManager
+import android.content.Context
 import android.opengl.GLSurfaceView
+import android.os.Build
 import android.os.Bundle
+import com.blankj.utilcode.util.LogUtils
+import com.blankj.utilcode.util.ToastUtils
 
 class AirHockeyActivity : Activity() {
     private var mGLSurfaceView: GLSurfaceView? = null
@@ -10,20 +15,28 @@ class AirHockeyActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //        setContentView(R.layout.activity_main);
-
         mGLSurfaceView = GLSurfaceView(this)
-        mGLSurfaceView!!.setEGLContextClientVersion(2)
 
-        //        mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        mGLSurfaceView!!.setRenderer(AirHockeyRenderer(this))
-        mRender = true
+        val activityManager: ActivityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val configurationInfo = activityManager.deviceConfigurationInfo
+        val supportsEs2 = configurationInfo.reqGlEsVersion >= 0x20000
+                || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1
+                && (Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")))
+
+        if (supportsEs2) {
+            mGLSurfaceView!!.setEGLContextClientVersion(2)
+            mGLSurfaceView!!.setRenderer(AirHockeyRenderer(this))
+            mRender = true
+        } else {
+            LogUtils.e("This device does not support OpenGL ES 2.0")
+            ToastUtils.showShort("This device does not support OpenGL ES 2.0")
+        }
 
         setContentView(mGLSurfaceView)
-
-        // Example of a call to a native method
-        //        TextView tv = (TextView) findViewById(R.id.sample_text);
-        //        tv.setText(stringFromJNI());
     }
 
     override fun onPause() {
@@ -49,8 +62,6 @@ class AirHockeyActivity : Activity() {
     external fun stringFromJNI(): String
 
     companion object {
-
-        // Used to load the 'native-lib' library on application startup.
         init {
             System.loadLibrary("native-lib")
         }
