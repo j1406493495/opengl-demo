@@ -19,9 +19,9 @@ object TextResourceReader {
 
             var nextLine: String? = bufferedReader.readLine()
             while (nextLine != null) {
-                nextLine = bufferedReader.readLine()
                 builder.append(nextLine)
                 builder.append("\n")
+                nextLine = bufferedReader.readLine()
             }
         } catch (ioException: IOException) {
             throw RuntimeException("Can not open resource: $resourceId", ioException)
