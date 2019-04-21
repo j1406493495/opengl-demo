@@ -31,11 +31,20 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
 
         // 两个三角形合成一个长方形
         val tableVertices = floatArrayOf(
+                // 边框
+                -0.55f, -0.55f,
+                0.55f,  0.55f,
+                -0.55f,  0.55f,
+
+                -0.55f, -0.55f,
+                0.55f, -0.55f,
+                0.55f,  0.55f,
+
+                // 桌板
                 -0.5f, -0.5f,
                 0.5f,  0.5f,
                 -0.5f,  0.5f,
 
-                // Triangle 2
                 -0.5f, -0.5f,
                 0.5f, -0.5f,
                 0.5f,  0.5f,
@@ -119,24 +128,30 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
         /**
+         * 画边框
+         */
+        GLES20.glUniform4f(uColorLocation, 0.5f, 0.5f, 0.5f, 1.0f)
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
+
+        /**
          * 画桌子
          */
         GLES20.glUniform4f(uColorLocation, 1.0f, 1.0f, 1.0f, 1.0f)
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 6, 6)
 
         /**
          * 画分割线
          */
         GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f)
-        GLES20.glDrawArrays(GLES20.GL_LINES, 6, 2)
+        GLES20.glDrawArrays(GLES20.GL_LINES, 12, 2)
 
         /**
          * 画木棰
          */
         GLES20.glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f)
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 8, 1)
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 14, 1)
         GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f)
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 9, 1)
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 15, 1)
     }
 
 }
