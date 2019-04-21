@@ -16,15 +16,19 @@ import cn.woong.opengl.utils.TextResourceReader
 
 class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     private var vertexData: FloatBuffer
-    private var uColorLocation: Int = 0
+//    private var uColorLocation: Int = 0
+    private var aColorLocation: Int = 0
     private var aPositionLocation: Int = 0
     private var program: Int = 0
 
     companion object {
         private const val U_COLOR: String = "u_Color"
+        private const val A_COLOR: String = "a_Color"
         private const val A_POSITION: String = "a_Position"
         private const val BYTES_PER_FLOAT = 4
         private const val POSITION_COMPONENT_COUNT = 2
+        private const val COLOR_COMPONENT_COUNT = 3
+        private const val STRIDE = (POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT) * BYTES_PER_FLOAT
     }
 
     init {
@@ -32,30 +36,36 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         // 两个三角形合成一个长方形
         val tableVertices = floatArrayOf(
                 // 边框
-                -0.55f, -0.55f,
-                0.55f,  0.55f,
-                -0.55f,  0.55f,
+//                -0.55f, -0.55f,
+//                0.55f,  0.55f,
+//                -0.55f,  0.55f,
 
-                -0.55f, -0.55f,
-                0.55f, -0.55f,
-                0.55f,  0.55f,
+//                -0.55f, -0.55f,
+//                0.55f, -0.55f,
+//                0.55f,  0.55f,
 
                 // 桌板
-                -0.5f, -0.5f,
-                0.5f,  0.5f,
-                -0.5f,  0.5f,
-
-                -0.5f, -0.5f,
-                0.5f, -0.5f,
-                0.5f,  0.5f,
+                0f, 0f, 1f, 1f, 1f,
+                -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
+                0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
+                0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
+                -0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
+                -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
+//                -0.5f, -0.5f,
+//                0.5f,  0.5f,
+//                -0.5f,  0.5f,
+//
+//                -0.5f, -0.5f,
+//                0.5f, -0.5f,
+//                0.5f,  0.5f,
 
                 // Line 1
-                -0.5f, 0f,
-                0.5f, 0f,
+                -0.5f, 0f, 1f, 0f, 0f,
+                0.5f, 0f, 1f, 0f, 0f,
 
                 // Mallets
-                0f, -0.25f,
-                0f,  0.25f)
+                0f, -0.25f, 0f, 0f, 1f,
+                0f,  0.25f, 1f, 0f, 0f)
 //                // 第一个三角形坐标
 //                0f, 0f, 9f, 14f, 0f, 14f,
 //                // 第二个三角形坐标
@@ -108,7 +118,8 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         /**
          * 获取属性和 uniform 位置
          */
-        uColorLocation = GLES20.glGetUniformLocation(program, U_COLOR)
+//        uColorLocation = GLES20.glGetUniformLocation(program, U_COLOR)
+        aColorLocation = GLES20.glGetAttribLocation(program, A_COLOR)
         aPositionLocation = GLES20.glGetAttribLocation(program, A_POSITION)
 
         /**
@@ -116,8 +127,13 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
          */
         vertexData.position(0)
         GLES20.glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GLES20.GL_FLOAT,
-                false, 0, vertexData)
+                false, STRIDE, vertexData)
         GLES20.glEnableVertexAttribArray(aPositionLocation)
+
+        vertexData.position(POSITION_COMPONENT_COUNT)
+        GLES20.glVertexAttribPointer(aColorLocation, COLOR_COMPONENT_COUNT, GLES20.GL_FLOAT,
+                false, STRIDE, vertexData)
+        GLES20.glEnableVertexAttribArray(aColorLocation)
     }
 
     override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
@@ -130,28 +146,28 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         /**
          * 画边框
          */
-        GLES20.glUniform4f(uColorLocation, 0.5f, 0.5f, 0.5f, 1.0f)
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
+//        GLES20.glUniform4f(uColorLocation, 0.5f, 0.5f, 0.5f, 1.0f)
+//        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6)
 
         /**
          * 画桌子
          */
-        GLES20.glUniform4f(uColorLocation, 1.0f, 1.0f, 1.0f, 1.0f)
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 6, 6)
+//        GLES20.glUniform4f(uColorLocation, 1.0f, 1.0f, 1.0f, 1.0f)
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 6)
 
         /**
          * 画分割线
          */
-        GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f)
-        GLES20.glDrawArrays(GLES20.GL_LINES, 12, 2)
+//        GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f)
+        GLES20.glDrawArrays(GLES20.GL_LINES, 6, 2)
 
         /**
          * 画木棰
          */
-        GLES20.glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f)
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 14, 1)
-        GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f)
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 15, 1)
+//        GLES20.glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f)
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 8, 1)
+//        GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f)
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 9, 1)
     }
 
 }
