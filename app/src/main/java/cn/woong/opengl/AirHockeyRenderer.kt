@@ -3,6 +3,7 @@ package cn.woong.opengl
 import android.content.Context
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
+import android.opengl.Matrix
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -16,7 +17,9 @@ import cn.woong.opengl.utils.TextResourceReader
 
 class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     private var vertexData: FloatBuffer
+    private var projectionMatrix: FloatArray = FloatArray(16)
 //    private var uColorLocation: Int = 0
+    private var uMatrixLocation: Int = 0
     private var aColorLocation: Int = 0
     private var aPositionLocation: Int = 0
     private var program: Int = 0
@@ -25,6 +28,7 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         private const val U_COLOR: String = "u_Color"
         private const val A_COLOR: String = "a_Color"
         private const val A_POSITION: String = "a_Position"
+        private const val U_MATRIX: String = "u_Matrix"
         private const val BYTES_PER_FLOAT = 4
         private const val POSITION_COMPONENT_COUNT = 2
         private const val COLOR_COMPONENT_COUNT = 3
@@ -46,11 +50,11 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
 
                 // 桌板
                 0f, 0f, 1f, 1f, 1f,
-                -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
-                0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
-                0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
-                -0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
-                -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
+                -0.5f, -0.8f, 0.7f, 0.7f, 0.7f,
+                0.5f, -0.8f, 0.7f, 0.7f, 0.7f,
+                0.5f, 0.8f, 0.7f, 0.7f, 0.7f,
+                -0.5f, 0.8f, 0.7f, 0.7f, 0.7f,
+                -0.5f, -0.8f, 0.7f, 0.7f, 0.7f,
 //                -0.5f, -0.5f,
 //                0.5f,  0.5f,
 //                -0.5f,  0.5f,
@@ -64,8 +68,8 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
                 0.5f, 0f, 1f, 0f, 0f,
 
                 // Mallets
-                0f, -0.25f, 0f, 0f, 1f,
-                0f,  0.25f, 1f, 0f, 0f)
+                0f, -0.4f, 0f, 0f, 1f,
+                0f,  0.4f, 1f, 0f, 0f)
 //                // 第一个三角形坐标
 //                0f, 0f, 9f, 14f, 0f, 14f,
 //                // 第二个三角形坐标
@@ -121,6 +125,7 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
 //        uColorLocation = GLES20.glGetUniformLocation(program, U_COLOR)
         aColorLocation = GLES20.glGetAttribLocation(program, A_COLOR)
         aPositionLocation = GLES20.glGetAttribLocation(program, A_POSITION)
+        uMatrixLocation = GLES20.glGetUniformLocation(program, U_MATRIX)
 
         /**
          * 关联属性与顶点数据
@@ -138,10 +143,23 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
 
     override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
+
+        val aspectRatio = if (width > height) {
+            width.toFloat() / height.toFloat()
+        } else {
+            height.toFloat() / width.toFloat()
+        }
+
+        if (width > height) {
+            Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
+        } else {
+            Matrix.orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f)
+        }
     }
 
     override fun onDrawFrame(gl: GL10) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+        GLES20.glUniformMatrix4fv(uMatrixLocation, 1, false, projectionMatrix, 0)
 
         /**
          * 画边框
