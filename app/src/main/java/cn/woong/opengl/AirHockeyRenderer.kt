@@ -30,7 +30,7 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         private const val A_POSITION: String = "a_Position"
         private const val U_MATRIX: String = "u_Matrix"
         private const val BYTES_PER_FLOAT = 4
-        private const val POSITION_COMPONENT_COUNT = 4
+        private const val POSITION_COMPONENT_COUNT = 2
         private const val COLOR_COMPONENT_COUNT = 3
         private const val STRIDE = (POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT) * BYTES_PER_FLOAT
     }
@@ -49,12 +49,12 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
 //                0.55f,  0.55f,
 
                 // 桌板
-                0f, 0f, 0f, 1.5f, 1f, 1f, 1f,
-                -0.5f, -0.8f, 0f, 1f, 0.7f, 0.7f, 0.7f,
-                0.5f, -0.8f, 0f, 1f, 0.7f, 0.7f, 0.7f,
-                0.5f, 0.8f, 0f, 2f, 0.7f, 0.7f, 0.7f,
-                -0.5f, 0.8f, 0f, 2f, 0.7f, 0.7f, 0.7f,
-                -0.5f, -0.8f, 0f, 1f, 0.7f, 0.7f, 0.7f,
+                0f, 0f, 1f, 1f, 1f,
+                -0.5f, -0.8f, 0.7f, 0.7f, 0.7f,
+                0.5f, -0.8f, 0.7f, 0.7f, 0.7f,
+                0.5f, 0.8f, 0.7f, 0.7f, 0.7f,
+                -0.5f, 0.8f, 0.7f, 0.7f, 0.7f,
+                -0.5f, -0.8f, 0.7f, 0.7f, 0.7f,
 //                -0.5f, -0.5f,
 //                0.5f,  0.5f,
 //                -0.5f,  0.5f,
@@ -64,12 +64,12 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
 //                0.5f,  0.5f,
 
                 // Line 1
-                -0.5f, 0f, 0f, 1.5f, 1f, 0f, 0f,
-                0.5f, 0f, 0f, 1.5f, 1f, 0f, 0f,
+                -0.5f, 0f, 1f, 0f, 0f,
+                0.5f, 0f, 1f, 0f, 0f,
 
                 // Mallets
-                0f, -0.4f, 0f, 1.25f, 0f, 0f, 1f,
-                0f,  0.4f, 0f, 1.75f, 1f, 0f, 0f)
+                0f, -0.4f, 0f, 0f, 1f,
+                0f,  0.4f, 1f, 0f, 0f)
 //                // 第一个三角形坐标
 //                0f, 0f, 9f, 14f, 0f, 14f,
 //                // 第二个三角形坐标
