@@ -4,6 +4,7 @@ import android.content.Context
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
+import cn.woong.opengl.utils.MatrixHelper
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -18,6 +19,7 @@ import cn.woong.opengl.utils.TextResourceReader
 class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     private var vertexData: FloatBuffer
     private var projectionMatrix: FloatArray = FloatArray(16)
+    private var modelMatrix: FloatArray = FloatArray(16)
 //    private var uColorLocation: Int = 0
     private var uMatrixLocation: Int = 0
     private var aColorLocation: Int = 0
@@ -144,17 +146,30 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
 
-        val aspectRatio = if (width > height) {
-            width.toFloat() / height.toFloat()
-        } else {
-            height.toFloat() / width.toFloat()
-        }
+        MatrixHelper.perspectiveM(projectionMatrix, 45f,
+                width.toFloat() / height.toFloat(), 1f, 10f)
 
-        if (width > height) {
-            Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
-        } else {
-            Matrix.orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f)
-        }
+        Matrix.setIdentityM(modelMatrix, 0)
+//        Matrix.translateM(modelMatrix, 0, 0f, 0f, -2f)
+        Matrix.translateM(modelMatrix, 0, 0f, 0f, -2.5f)
+        Matrix.rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f)
+
+        val temp = FloatArray(16)
+        Matrix.multiplyMM(temp, 0, projectionMatrix, 0, modelMatrix, 0)
+        System.arraycopy(temp, 0, projectionMatrix, 0, temp.size)
+
+
+//        val aspectRatio = if (width > height) {
+//            width.toFloat() / height.toFloat()
+//        } else {
+//            height.toFloat() / width.toFloat()
+//        }
+//
+//        if (width > height) {
+//            Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
+//        } else {
+//            Matrix.orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f)
+//        }
     }
 
     override fun onDrawFrame(gl: GL10) {
