@@ -146,7 +146,7 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
 
-        MatrixHelper.perspectiveM(projectionMatrix, 45f,
+        MatrixHelper.perspectiveM(projectionMatrix, 50f,
                 width.toFloat() / height.toFloat(), 1f, 10f)
 
         Matrix.setIdentityM(modelMatrix, 0)
