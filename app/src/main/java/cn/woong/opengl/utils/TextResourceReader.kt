@@ -9,6 +9,9 @@ import java.io.InputStream
 import java.io.InputStreamReader
 
 object TextResourceReader {
+    /**
+     * 从 raw 文件中加载着色器资源
+     */
     fun readTextFileFromResource(context: Context, resourceId: Int): String {
         val builder = StringBuilder()
 
@@ -17,6 +20,7 @@ object TextResourceReader {
             val inputStreamReader = InputStreamReader(inputStream)
             val bufferedReader = BufferedReader(inputStreamReader)
 
+            // 逐行读取文件内容
             var nextLine: String? = bufferedReader.readLine()
             while (nextLine != null) {
                 builder.append(nextLine)
