@@ -17,6 +17,7 @@ class AirHockeyActivity : Activity() {
         super.onCreate(savedInstanceState)
         mGLSurfaceView = GLSurfaceView(this)
 
+        // 检查设备是否支持 OpenGL2.0
         val activityManager: ActivityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val configurationInfo = activityManager.deviceConfigurationInfo
         val supportsEs2 = configurationInfo.reqGlEsVersion >= 0x20000
