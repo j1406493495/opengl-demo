@@ -4,6 +4,7 @@ import android.content.Context
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
+import cn.woong.opengl.constants.Constants.BYTES_PER_FLOAT
 import cn.woong.opengl.utils.MatrixHelper
 
 import java.nio.ByteBuffer
@@ -31,7 +32,6 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         private const val A_COLOR: String = "a_Color"
         private const val A_POSITION: String = "a_Position"
         private const val U_MATRIX: String = "u_Matrix"
-        private const val BYTES_PER_FLOAT = 4
         private const val POSITION_COMPONENT_COUNT = 2
         private const val COLOR_COMPONENT_COUNT = 3
         private const val STRIDE = (POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT) * BYTES_PER_FLOAT
