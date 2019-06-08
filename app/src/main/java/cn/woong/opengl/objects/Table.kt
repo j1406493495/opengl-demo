@@ -3,12 +3,15 @@ package cn.woong.opengl.objects
 import android.opengl.GLES20
 import cn.woong.opengl.constants.Constants
 import cn.woong.opengl.data.VertexArray
+import cn.woong.opengl.programs.TextureShaderProgram
 
 /**
  * @author Woong on 2019/6/3
  * @website http://woong.cn
  */
-class Table(var vertexArray: VertexArray) {
+class Table {
+    private var vertexArray: VertexArray
+
     companion object {
         private val POSITION_COMPONENT_COUNT = 2
         private val TEXTURE_COORDINATES_COMPONENT_COUNT = 2

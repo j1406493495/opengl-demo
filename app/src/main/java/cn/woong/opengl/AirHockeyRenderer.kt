@@ -5,6 +5,10 @@ import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
 import cn.woong.opengl.constants.Constants.BYTES_PER_FLOAT
+import cn.woong.opengl.objects.Mallet
+import cn.woong.opengl.objects.Table
+import cn.woong.opengl.programs.ColorShaderProgram
+import cn.woong.opengl.programs.TextureShaderProgram
 import cn.woong.opengl.utils.MatrixHelper
 
 import java.nio.ByteBuffer
@@ -16,8 +20,66 @@ import javax.microedition.khronos.opengles.GL10
 
 import cn.woong.opengl.utils.ShaderHelper
 import cn.woong.opengl.utils.TextResourceReader
+import cn.woong.opengl.utils.TextureHelper
 
 class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
+    private var projectionMatrix: FloatArray = FloatArray(16)
+    private var modelMatrix: FloatArray = FloatArray(16)
+    private lateinit var table: Table
+    private lateinit var mallet: Mallet
+    private lateinit var textureProgram: TextureShaderProgram
+    private lateinit var colorProgram: ColorShaderProgram
+    private var texture = 0
+
+    override fun onDrawFrame(gl: GL10?) {
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+
+        // 告诉 opengl 使用这个 program
+        textureProgram.useProgram()
+        // 传入 uniform
+        textureProgram.setUniform(projectionMatrix, texture)
+        // 绑定顶点数组数据和着色器程序
+        table.bindData(textureProgram)
+        // 绘制桌子
+        table.draw()
+
+        colorProgram.useProgram()
+        colorProgram.setUniforms(projectionMatrix)
+        mallet.bindData(colorProgram)
+        mallet.draw()
+    }
+
+    override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
+        GLES20.glViewport(0, 0, width, height)
+
+        MatrixHelper.perspectiveM(projectionMatrix, 50f,
+                width.toFloat() / height.toFloat(), 1f, 10f)
+
+        Matrix.setIdentityM(modelMatrix, 0)
+        Matrix.translateM(modelMatrix, 0, 0f, 0f, -2.5f)
+        Matrix.rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f)
+
+        val temp = FloatArray(16)
+        Matrix.multiplyMM(temp, 0, projectionMatrix, 0, modelMatrix, 0)
+        System.arraycopy(temp, 0, projectionMatrix, 0, temp.size)
+    }
+
+    override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
+
+        table = Table()
+        mallet = Mallet()
+
+        textureProgram = TextureShaderProgram(context)
+        colorProgram = ColorShaderProgram(context)
+
+        texture = TextureHelper.loadTexture(context, R.drawable.air_hockey_surface)
+    }
+
+
+    /*********************************** 第7章纹理前代码 *******************************
+     *
+     *
     private var vertexData: FloatBuffer
     private var projectionMatrix: FloatArray = FloatArray(16)
     private var modelMatrix: FloatArray = FloatArray(16)
@@ -202,5 +264,8 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
 //        GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f)
         GLES20.glDrawArrays(GLES20.GL_POINTS, 9, 1)
     }
+     *
+     *
+    **/
 
 }
