@@ -4,12 +4,39 @@ import android.opengl.GLES20
 import cn.woong.opengl.constants.Constants
 import cn.woong.opengl.data.VertexArray
 import cn.woong.opengl.programs.ColorShaderProgram
+import cn.woong.opengl.utils.Geometry
 
 /**
  * @author Woong on 2019/6/3
  * @website http://woong.cn
  */
-class Mallet {
+class Mallet(var radius: Float, var height: Float, var numPointsAroundMallet: Int) {
+    companion object {
+        private val POSITION_COMPONENT_COUNT = 2
+    }
+
+    private lateinit var vertexArray: VertexArray
+    private lateinit var drawList: ArrayList<ObjectBuilder.DrawCommand>
+
+    init {
+        val generatedData = ObjectBuilder.createMallet(Geometry.Point(0f, 0f, 0f),
+                radius, height, numPointsAroundMallet)
+        vertexArray = VertexArray(generatedData.vertexData)
+        drawList = generatedData.drawList
+    }
+
+    fun bindData(colorProgram: ColorShaderProgram) {
+        vertexArray.setVertexAttribPointer(0, colorProgram.getPositionAttributeLocation(),
+                POSITION_COMPONENT_COUNT, 0)
+    }
+
+    fun draw() {
+        drawList.forEach { drawCommand: ObjectBuilder.DrawCommand -> drawCommand.draw() }
+    }
+
+    /****
+     * Mallet 是一个点的情况
+     *
     private var vertexArray: VertexArray
 
     companion object {
@@ -38,4 +65,5 @@ class Mallet {
     fun draw() {
         GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 2)
     }
+    ****/
 }

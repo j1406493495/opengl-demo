@@ -1,7 +1,6 @@
 package cn.woong.opengl.objects
 
 import android.opengl.GLES20
-import android.util.FloatMath
 import cn.woong.opengl.utils.Geometry
 
 /**
@@ -11,6 +10,54 @@ import cn.woong.opengl.utils.Geometry
 class ObjectBuilder(var sizeInVertices: Int) {
     companion object {
         private val FLOATS_PER_VERTEX = 3
+
+        /**
+         * 圆柱体顶部顶点数量
+         */
+        fun sizeOfCircleInVertices(numPoints: Int): Int {
+            return 1 + (numPoints + 1)
+        }
+
+        /**
+         * 圆柱体侧面顶点数量
+         */
+        fun sizeOfOpenCylinderInVertices(numPoints: Int): Int {
+            return (numPoints + 1) * 2
+        }
+
+        fun creataPuck(puck: Geometry.Cylinder, numPoints: Int): GeneratedData {
+            val size = sizeOfCircleInVertices(numPoints) + sizeOfOpenCylinderInVertices(numPoints)
+            val puckTop = Geometry.Circle(puck.center.translateY(puck.height / 2), puck.radius)
+
+            val builder: ObjectBuilder = ObjectBuilder(size)
+            builder.appendCircle(puckTop, numPoints)
+            builder.appendOpenCylinder(puck, numPoints)
+
+            return builder.build()
+        }
+
+        fun createMallet(center: Geometry.Point, radius: Float, height: Float, numPoints: Int): GeneratedData {
+            val size = sizeOfCircleInVertices(numPoints) * 2 + sizeOfOpenCylinderInVertices(numPoints) * 2
+            val baseHeight = height * 0.25f
+            val baseCircle = Geometry.Circle(center.translateY(-baseHeight), radius)
+            val baseCylinder = Geometry.Cylinder(baseCircle.center.translateY(-baseHeight / 2f),
+                    radius, baseHeight)
+
+            val handleHeight = height * 0.75f
+            val handleRadius = radius / 3f
+            val handleCircle = Geometry.Circle(center.translateY(height * 0.5f), handleRadius)
+            val handleCylinder = Geometry.Cylinder(handleCircle.center.translateY(-handleHeight / 2f),
+                    handleRadius, handleHeight)
+
+            val builder = ObjectBuilder(size)
+            builder.appendCircle(baseCircle, numPoints)
+            builder.appendOpenCylinder(baseCylinder, numPoints)
+            builder.appendCircle(handleCircle, numPoints)
+            builder.appendOpenCylinder(handleCylinder, numPoints)
+
+            return builder.build()
+        }
+
     }
 
     private lateinit var vertexData: FloatArray
@@ -19,31 +66,6 @@ class ObjectBuilder(var sizeInVertices: Int) {
 
     init {
         vertexData = FloatArray(sizeInVertices * FLOATS_PER_VERTEX)
-    }
-
-    /**
-     * 圆柱体顶部顶点数量
-     */
-    fun sizeOfCircleInVertices(numPoints: Int): Int {
-        return 1 + (numPoints + 1)
-    }
-
-    /**
-     * 圆柱体侧面顶点数量
-     */
-    fun sizeOfOpenCylinderInVertices(numPoints: Int): Int {
-        return (numPoints + 1) * 2
-    }
-
-    fun creataPuck(puck: Geometry.Cylinder, numPoints: Int): GeneratedData {
-        val size = sizeOfCircleInVertices(numPoints) + sizeOfOpenCylinderInVertices(numPoints)
-        val puckTop = Geometry.Circle(puck.center.translateY(puck.height / 2), puck.radius)
-
-        val builder: ObjectBuilder = ObjectBuilder(size)
-        builder.appendCircle(puckTop, numPoints)
-        builder.appendOpenCylinder(puck, numPoints)
-
-        return builder.build()
     }
 
     private fun appendCircle(circle: Geometry.Circle, numPoints: Int) {
@@ -103,5 +125,5 @@ class ObjectBuilder(var sizeInVertices: Int) {
         fun draw()
     }
 
-    class GeneratedData(var vertexData: FloatArray, var drawList: List<DrawCommand>)
+    class GeneratedData(var vertexData: FloatArray, var drawList: ArrayList<DrawCommand>)
 }
