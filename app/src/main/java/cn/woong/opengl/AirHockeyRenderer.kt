@@ -6,6 +6,7 @@ import android.opengl.GLSurfaceView
 import android.opengl.Matrix
 import cn.woong.opengl.constants.Constants.BYTES_PER_FLOAT
 import cn.woong.opengl.objects.Mallet
+import cn.woong.opengl.objects.Puck
 import cn.woong.opengl.objects.Table
 import cn.woong.opengl.programs.ColorShaderProgram
 import cn.woong.opengl.programs.TextureShaderProgram
@@ -25,6 +26,10 @@ import cn.woong.opengl.utils.TextureHelper
 class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     private var projectionMatrix: FloatArray = FloatArray(16)
     private var modelMatrix: FloatArray = FloatArray(16)
+    private var viewMatrix = FloatArray(16)
+    private var viewProjectionMatrix = FloatArray(16)
+    private var modelViewProjectionMatrix = FloatArray(16)
+    private lateinit var puck: Puck
     private lateinit var table: Table
     private lateinit var mallet: Mallet
     private lateinit var textureProgram: TextureShaderProgram
@@ -34,6 +39,31 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     override fun onDrawFrame(gl: GL10?) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
+        Matrix.multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
+
+        positionTableInScene()
+        textureProgram.useProgram()
+        textureProgram.setUniform(modelViewProjectionMatrix, texture)
+        table.bindData(textureProgram)
+        table.draw()
+
+        positionObjectInScene(0f, mallet.height / 2f, -0.4f)
+        colorProgram.useProgram()
+        colorProgram.setUniforms(modelViewProjectionMatrix, 1f, 0f, 0f)
+        mallet.bindData(colorProgram)
+        mallet.draw()
+
+        positionObjectInScene(0f, mallet.height / 2f, 0.4f)
+        colorProgram.setUniforms(modelViewProjectionMatrix, 0f, 0f, 1f)
+        mallet.draw()
+
+        positionObjectInScene(0f, puck.height / 2f, 0f)
+        colorProgram.setUniforms(modelViewProjectionMatrix, 0.8f, 0.8f, 1f)
+        puck.bindData(colorProgram)
+        puck.draw()
+
+        /**
+         *
         // 告诉 opengl 使用这个 program
         textureProgram.useProgram()
         // 传入 uniform
@@ -47,6 +77,7 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         colorProgram.setUniforms(projectionMatrix)
         mallet.bindData(colorProgram)
         mallet.draw()
+         */
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -55,6 +86,11 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         MatrixHelper.perspectiveM(projectionMatrix, 50f,
                 width.toFloat() / height.toFloat(), 1f, 10f)
 
+        Matrix.setLookAtM(viewMatrix, 0, 0f, 1.2f, 2.2f, 0f,
+                0f, 0f, 0f, 1f, 0f)
+
+        /**
+         *
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, 0f, 0f, -2.5f)
         Matrix.rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f)
@@ -62,13 +98,15 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         val temp = FloatArray(16)
         Matrix.multiplyMM(temp, 0, projectionMatrix, 0, modelMatrix, 0)
         System.arraycopy(temp, 0, projectionMatrix, 0, temp.size)
+         */
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
 
+        puck = Puck(0.06f, 0.02f, 32)
+        mallet = Mallet(0.08f, 0.15f, 32)
         table = Table()
-        mallet = Mallet()
 
         textureProgram = TextureShaderProgram(context)
         colorProgram = ColorShaderProgram(context)
@@ -76,6 +114,17 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         texture = TextureHelper.loadTexture(context, R.drawable.air_hockey_surface)
     }
 
+    private fun positionTableInScene() {
+        Matrix.setIdentityM(modelMatrix, 0)
+        Matrix.rotateM(modelMatrix, 0, -90f, 1f, 0f, 0f)
+        Matrix.multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix, 0, modelMatrix, 0)
+    }
+
+    private fun positionObjectInScene(x: Float, y: Float, z: Float) {
+        Matrix.setIdentityM(modelMatrix, 0)
+        Matrix.translateM(modelMatrix, 0, x, y, z)
+        Matrix.multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix, 0, modelMatrix, 0)
+    }
 
     /*********************************** 第7章纹理前代码 *******************************
      *

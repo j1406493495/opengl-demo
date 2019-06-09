@@ -12,7 +12,7 @@ import cn.woong.opengl.utils.Geometry
  */
 class Mallet(var radius: Float, var height: Float, var numPointsAroundMallet: Int) {
     companion object {
-        private val POSITION_COMPONENT_COUNT = 2
+        private val POSITION_COMPONENT_COUNT = 3
     }
 
     private lateinit var vertexArray: VertexArray
