@@ -6,16 +6,18 @@ import android.content.Context
 import android.opengl.GLSurfaceView
 import android.os.Build
 import android.os.Bundle
+import android.view.MotionEvent
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.ToastUtils
 
 class AirHockeyActivity : Activity() {
-    private var mGLSurfaceView: GLSurfaceView? = null
+    private var glSurfaceView: GLSurfaceView? = null
+    private var airHockeyRenderer = AirHockeyRenderer(this)
     private var mRender: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mGLSurfaceView = GLSurfaceView(this)
+        glSurfaceView = GLSurfaceView(this)
 
         // 检查设备是否支持 OpenGL2.0
         val activityManager: ActivityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -29,22 +31,39 @@ class AirHockeyActivity : Activity() {
                 || Build.MODEL.contains("Android SDK built for x86")))
 
         if (supportsEs2) {
-            mGLSurfaceView!!.setEGLContextClientVersion(2)
-            mGLSurfaceView!!.setRenderer(AirHockeyRenderer(this))
+            glSurfaceView!!.setEGLContextClientVersion(2)
+            glSurfaceView!!.setRenderer(airHockeyRenderer)
             mRender = true
         } else {
             LogUtils.e("This device does not support OpenGL ES 2.0")
             ToastUtils.showShort("This device does not support OpenGL ES 2.0")
         }
 
-        setContentView(mGLSurfaceView)
+        glSurfaceView!!.setOnTouchListener { v, event ->
+            if (event != null) {
+                val normalizedX = event.x / v.width.toFloat() * 2 - 1
+                val normalizedY = -(event.y / v.height.toFloat() * 2 - 1)
+
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    glSurfaceView!!.queueEvent { airHockeyRenderer.handleTouchPress(normalizedX, normalizedY) }
+                } else if (event.action == MotionEvent.ACTION_MOVE) {
+                    glSurfaceView!!.queueEvent { airHockeyRenderer.handleTouchDrag(normalizedX, normalizedY) }
+                }
+
+                return@setOnTouchListener true
+            } else {
+                return@setOnTouchListener false
+            }
+        }
+
+        setContentView(glSurfaceView)
     }
 
     override fun onPause() {
         super.onPause()
 
         if (mRender) {
-            mGLSurfaceView!!.onPause()
+            glSurfaceView!!.onPause()
         }
     }
 
@@ -52,7 +71,7 @@ class AirHockeyActivity : Activity() {
         super.onResume()
 
         if (mRender) {
-            mGLSurfaceView!!.onResume()
+            glSurfaceView!!.onResume()
         }
     }
 

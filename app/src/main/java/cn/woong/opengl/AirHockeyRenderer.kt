@@ -10,7 +10,7 @@ import cn.woong.opengl.objects.Puck
 import cn.woong.opengl.objects.Table
 import cn.woong.opengl.programs.ColorShaderProgram
 import cn.woong.opengl.programs.TextureShaderProgram
-import cn.woong.opengl.utils.MatrixHelper
+import cn.woong.opengl.utils.*
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -19,27 +19,27 @@ import java.nio.FloatBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-import cn.woong.opengl.utils.ShaderHelper
-import cn.woong.opengl.utils.TextResourceReader
-import cn.woong.opengl.utils.TextureHelper
-
 class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     private var projectionMatrix: FloatArray = FloatArray(16)
     private var modelMatrix: FloatArray = FloatArray(16)
     private var viewMatrix = FloatArray(16)
     private var viewProjectionMatrix = FloatArray(16)
     private var modelViewProjectionMatrix = FloatArray(16)
+    private var invertedViewProjectionMatrix = FloatArray(16)
     private lateinit var puck: Puck
     private lateinit var table: Table
     private lateinit var mallet: Mallet
     private lateinit var textureProgram: TextureShaderProgram
     private lateinit var colorProgram: ColorShaderProgram
     private var texture = 0
+    private var malletPressed = false
+    private lateinit var blueMalletPosition: Geometry.Point
 
     override fun onDrawFrame(gl: GL10?) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
         Matrix.multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
+        Matrix.invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0)
 
         positionTableInScene()
         textureProgram.useProgram()
@@ -53,7 +53,8 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         mallet.bindData(colorProgram)
         mallet.draw()
 
-        positionObjectInScene(0f, mallet.height / 2f, 0.4f)
+//        positionObjectInScene(0f, mallet.height / 2f, 0.4f)
+        positionObjectInScene(blueMalletPosition.x, blueMalletPosition.y, blueMalletPosition.z)
         colorProgram.setUniforms(modelViewProjectionMatrix, 0f, 0f, 1f)
         mallet.draw()
 
@@ -83,7 +84,7 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
 
-        MatrixHelper.perspectiveM(projectionMatrix, 50f,
+        MatrixHelper.perspectiveM(projectionMatrix, 45f,
                 width.toFloat() / height.toFloat(), 1f, 10f)
 
         Matrix.setLookAtM(viewMatrix, 0, 0f, 1.2f, 2.2f, 0f,
@@ -107,6 +108,7 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         puck = Puck(0.06f, 0.02f, 32)
         mallet = Mallet(0.08f, 0.15f, 32)
         table = Table()
+        blueMalletPosition = Geometry.Point(0f, mallet.height / 2f, 0.4f)
 
         textureProgram = TextureShaderProgram(context)
         colorProgram = ColorShaderProgram(context)
@@ -124,6 +126,48 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, x, y, z)
         Matrix.multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix, 0, modelMatrix, 0)
+    }
+
+    fun handleTouchPress(normalizedX: Float, normalizedY: Float) {
+        val ray = convertNormalized2DPointToRay(normalizedX, normalizedY)
+        val malletBoundingSphere = Geometry.Sphere(Geometry.Point(blueMalletPosition.x,
+                blueMalletPosition.y, blueMalletPosition.z), mallet.height / 2f)
+        malletPressed = Geometry.intersects(malletBoundingSphere, ray)
+    }
+
+    fun handleTouchDrag(normalizedX: Float, normalizedY: Float) {
+        if (malletPressed) {
+            val ray = convertNormalized2DPointToRay(normalizedX, normalizedY)
+            val plane = Geometry.Plane(Geometry.Point(0f, 0f, 0f), Geometry.Vector(0f, 1f, 0f))
+            val touchedPoint = Geometry.intersectionPoint(ray, plane)
+            blueMalletPosition = Geometry.Point(touchedPoint.x, mallet.height / 2f, touchedPoint.z)
+        }
+    }
+
+    private fun convertNormalized2DPointToRay(normalizedX: Float, normalizedY: Float): Geometry.Ray {
+        val nearPointNdc = floatArrayOf(normalizedX, normalizedY, -1f, 1f)
+        val farPointNdc = floatArrayOf(normalizedX, normalizedY, 1f, 1f)
+        val nearPointWorld = FloatArray(4)
+        val farPointWorld = FloatArray(4)
+
+        Matrix.multiplyMV(nearPointWorld, 0, invertedViewProjectionMatrix,
+                0, nearPointNdc, 0)
+        Matrix.multiplyMV(farPointWorld, 0, invertedViewProjectionMatrix,
+                0, farPointNdc, 0)
+
+        divideByW(nearPointWorld)
+        divideByW(farPointWorld)
+
+        val nearPointRay = Geometry.Point(nearPointWorld[0], nearPointWorld[1], nearPointWorld[2])
+        val farPointRay = Geometry.Point(farPointWorld[0], farPointWorld[1], farPointWorld[2])
+
+        return Geometry.Ray(nearPointRay, Geometry.vectorBetween(nearPointRay, farPointRay))
+    }
+
+    private fun divideByW(vector: FloatArray) {
+        vector[0] /= vector[3]
+        vector[1] /= vector[3]
+        vector[2] /= vector[3]
     }
 
     /*********************************** 第7章纹理前代码 *******************************
