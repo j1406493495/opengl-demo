@@ -33,7 +33,7 @@ class Geometry {
 
         fun crossProduct(other: Vector): Vector {
             return Vector(y * other.z - z * other.y, z * other.x - x * other.z,
-                    x * other.y - y * other.z)
+                    x * other.y - y * other.x)
         }
 
         fun dotProduct(other: Vector): Float {
