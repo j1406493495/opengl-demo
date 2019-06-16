@@ -4,7 +4,6 @@ import android.content.Context
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
-import cn.woong.opengl.constants.Constants.BYTES_PER_FLOAT
 import cn.woong.opengl.objects.Mallet
 import cn.woong.opengl.objects.Puck
 import cn.woong.opengl.objects.Table
@@ -34,9 +33,32 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     private var texture = 0
     private var malletPressed = false
     private lateinit var blueMalletPosition: Geometry.Point
+    private val leftBound = -0.5f
+    private val rightBound = 0.5f
+    private val farBound = -0.8f
+    private val nearBound = 0.8f
+    private lateinit var previousBlueMalletPosition: Geometry.Point
+    private lateinit var puckPosition: Geometry.Point
+    private lateinit var puckVector: Geometry.Vector
 
     override fun onDrawFrame(gl: GL10?) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+
+        puckPosition = puckPosition.translate(puckVector)
+        if (puckPosition.x < leftBound + puck.radius || puckPosition.x > rightBound - puck.radius) {
+            puckVector = Geometry.Vector(-puckVector.x, puckVector.y, puckVector.z)
+            puckVector = puckVector.scale(0.9f)
+        }
+
+        if (puckPosition.z < farBound + puck.radius || puckPosition.z > nearBound - puck.radius) {
+            puckVector = Geometry.Vector(puckVector.x, puckVector.y, -puckVector.z)
+            puckVector = puckVector.scale(0.9f)
+        }
+
+        puckPosition = Geometry.Point(clamp(puckPosition.x, leftBound + puck.radius, rightBound - puck.radius),
+                puckPosition.y, clamp(puckPosition.z, farBound + puck.radius, nearBound - puck.radius))
+
+        puckVector = puckVector.scale(0.99f)
 
         Matrix.multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
         Matrix.invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0)
@@ -58,10 +80,12 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         colorProgram.setUniforms(modelViewProjectionMatrix, 0f, 0f, 1f)
         mallet.draw()
 
-        positionObjectInScene(0f, puck.height / 2f, 0f)
+//        positionObjectInScene(0f, puck.height / 2f, 0f)
+        positionObjectInScene(puckPosition.x, puckPosition.y, puckPosition.z)
         colorProgram.setUniforms(modelViewProjectionMatrix, 0.8f, 0.8f, 1f)
         puck.bindData(colorProgram)
         puck.draw()
+
 
         /**
          *
@@ -110,6 +134,9 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         table = Table()
         blueMalletPosition = Geometry.Point(0f, mallet.height / 2f, 0.4f)
 
+        puckPosition = Geometry.Point(0f, puck.height / 2f, 0f)
+        puckVector = Geometry.Vector(0f, 0f, 0f)
+
         textureProgram = TextureShaderProgram(context)
         colorProgram = ColorShaderProgram(context)
 
@@ -140,8 +167,22 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
             val ray = convertNormalized2DPointToRay(normalizedX, normalizedY)
             val plane = Geometry.Plane(Geometry.Point(0f, 0f, 0f), Geometry.Vector(0f, 1f, 0f))
             val touchedPoint = Geometry.intersectionPoint(ray, plane)
-            blueMalletPosition = Geometry.Point(touchedPoint.x, mallet.height / 2f, touchedPoint.z)
+
+            previousBlueMalletPosition = blueMalletPosition
+//            blueMalletPosition = Geometry.Point(touchedPoint.x, mallet.height / 2f, touchedPoint.z)
+            blueMalletPosition = Geometry.Point(clamp(touchedPoint.x, leftBound + mallet.radius,
+                    rightBound - mallet.radius), mallet.height / 2f, clamp(touchedPoint.z,
+                    0f + mallet.radius, nearBound - mallet.radius))
+
+            val distance = Geometry.vectorBetween(blueMalletPosition, puckPosition).length()
+            if (distance < (puck.radius + mallet.radius)) {
+                puckVector = Geometry.vectorBetween(previousBlueMalletPosition, blueMalletPosition)
+            }
         }
+    }
+
+    private fun clamp(value: Float, min: Float, max: Float): Float {
+        return Math.min(max, Math.max(value, min))
     }
 
     private fun convertNormalized2DPointToRay(normalizedX: Float, normalizedY: Float): Geometry.Ray {
