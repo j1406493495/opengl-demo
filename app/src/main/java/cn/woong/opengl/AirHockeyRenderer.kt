@@ -41,6 +41,54 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     private lateinit var puckPosition: Geometry.Point
     private lateinit var puckVector: Geometry.Vector
 
+    /**
+     * surface 创建或者重建时调用
+     * 初始化 opengl 相关数据
+     */
+    override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
+
+        puck = Puck(0.06f, 0.02f, 32)
+        mallet = Mallet(0.08f, 0.15f, 32)
+        table = Table()
+        blueMalletPosition = Geometry.Point(0f, mallet.height / 2f, 0.4f)
+
+        puckPosition = Geometry.Point(0f, puck.height / 2f, 0f)
+        puckVector = Geometry.Vector(0f, 0f, 0f)
+
+        textureProgram = TextureShaderProgram(context)
+        colorProgram = ColorShaderProgram(context)
+
+        texture = TextureHelper.loadTexture(context, R.drawable.air_hockey_surface)
+    }
+
+    /**
+     * surface 大小改变时调用
+     */
+    override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
+        GLES20.glViewport(0, 0, width, height)
+
+        MatrixHelper.perspectiveM(projectionMatrix, 45f,
+                width.toFloat() / height.toFloat(), 1f, 10f)
+
+        Matrix.setLookAtM(viewMatrix, 0, 0f, 1.2f, 2.2f, 0f,
+                0f, 0f, 0f, 1f, 0f)
+
+        /**
+         *
+        Matrix.setIdentityM(modelMatrix, 0)
+        Matrix.translateM(modelMatrix, 0, 0f, 0f, -2.5f)
+        Matrix.rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f)
+
+        val temp = FloatArray(16)
+        Matrix.multiplyMM(temp, 0, projectionMatrix, 0, modelMatrix, 0)
+        System.arraycopy(temp, 0, projectionMatrix, 0, temp.size)
+         */
+    }
+
+    /**
+     * 实时更新数据
+     */
     override fun onDrawFrame(gl: GL10?) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
@@ -103,44 +151,6 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         mallet.bindData(colorProgram)
         mallet.draw()
          */
-    }
-
-    override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-        GLES20.glViewport(0, 0, width, height)
-
-        MatrixHelper.perspectiveM(projectionMatrix, 45f,
-                width.toFloat() / height.toFloat(), 1f, 10f)
-
-        Matrix.setLookAtM(viewMatrix, 0, 0f, 1.2f, 2.2f, 0f,
-                0f, 0f, 0f, 1f, 0f)
-
-        /**
-         *
-        Matrix.setIdentityM(modelMatrix, 0)
-        Matrix.translateM(modelMatrix, 0, 0f, 0f, -2.5f)
-        Matrix.rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f)
-
-        val temp = FloatArray(16)
-        Matrix.multiplyMM(temp, 0, projectionMatrix, 0, modelMatrix, 0)
-        System.arraycopy(temp, 0, projectionMatrix, 0, temp.size)
-         */
-    }
-
-    override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
-
-        puck = Puck(0.06f, 0.02f, 32)
-        mallet = Mallet(0.08f, 0.15f, 32)
-        table = Table()
-        blueMalletPosition = Geometry.Point(0f, mallet.height / 2f, 0.4f)
-
-        puckPosition = Geometry.Point(0f, puck.height / 2f, 0f)
-        puckVector = Geometry.Vector(0f, 0f, 0f)
-
-        textureProgram = TextureShaderProgram(context)
-        colorProgram = ColorShaderProgram(context)
-
-        texture = TextureHelper.loadTexture(context, R.drawable.air_hockey_surface)
     }
 
     private fun positionTableInScene() {
