@@ -9,11 +9,13 @@ import java.nio.FloatBuffer
 /**
  * @author Woong on 2019/6/3
  * @website http://woong.cn
+ * 数据操作类，负责传输数据到本地内存
  */
 class VertexArray(var vertexData: FloatArray) {
     private var floatBuffer: FloatBuffer
 
     init {
+        // 把顶点数据从 Java 内存复制到本地内存, 使其不被 Java 内存回收控制
         floatBuffer = ByteBuffer.allocateDirect(vertexData.size * Constants.BYTES_PER_FLOAT)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer()

@@ -12,6 +12,9 @@ import cn.woong.opengl.utils.Geometry
  */
 class Mallet(var radius: Float, var height: Float, var numPointsAroundMallet: Int) {
     companion object {
+        /**
+         * 每次读取顶点的数量
+         */
         private val POSITION_COMPONENT_COUNT = 3
     }
 

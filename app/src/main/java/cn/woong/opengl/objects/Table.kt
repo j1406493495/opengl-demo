@@ -13,6 +13,9 @@ class Table {
     private var vertexArray: VertexArray
 
     companion object {
+        /**
+         * 每次读取顶点的数量
+         */
         private val POSITION_COMPONENT_COUNT = 2
         private val TEXTURE_COORDINATES_COMPONENT_COUNT = 2
         private val STRIDE = (POSITION_COMPONENT_COUNT + TEXTURE_COORDINATES_COMPONENT_COUNT) * Constants.BYTES_PER_FLOAT
