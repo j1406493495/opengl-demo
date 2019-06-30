@@ -22,12 +22,27 @@ class VertexArray(var vertexData: FloatArray) {
                 .put(vertexData)
     }
 
+    /**
+     * 关联 glsl 中的 attribute 变量(例如 a_Position) 和 floatBuffer 中的实际数据位置
+     */
     fun setVertexAttribPointer(dataOffset: Int, attributeLocation: Int, componentCount: Int, stride: Int) {
+        // 指针偏移，读取数据
         floatBuffer.position(dataOffset)
+
+        // opengl 从缓冲区中查看 attributeLocation 对应的数据
+        // attributeLocation: 属性位置
+        // componentCount: 每个属性数据的计数
+        // GL_FLOAT: 数据类型
+        // normalized: 整型数据时有用
+        // stride: 一个数组存储多个属性时，间隔长度
+        // floatBuffer: 数据源
         GLES20.glVertexAttribPointer(attributeLocation, componentCount, GLES20.GL_FLOAT,
                 false, stride, floatBuffer)
+
+        // 使能顶点数据
         GLES20.glEnableVertexAttribArray(attributeLocation)
 
+        // 指针归零，防止后续指针偏移出错
         floatBuffer.position(0)
     }
 }

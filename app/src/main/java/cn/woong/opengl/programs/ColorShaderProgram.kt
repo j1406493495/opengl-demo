@@ -24,17 +24,19 @@ class ColorShaderProgram(var colorContext: Context) : ShaderProgram(colorContext
 //    private var aColorLocation = 0
 
     init {
-        // 获取 uniform 在 shaderProgram 中的位置
+        // 获取 uniform 在 shaderProgram(glsl) 中的位置
         uMatrixLocation = GLES20.glGetUniformLocation(program, U_MATRIX)
         uColorLocation = GLES20.glGetUniformLocation(program, U_COLOR)
 
-        // 获取 attribute 在 shaderProgram 中的位置
+        // 获取 attribute 在 shaderProgram(glsl) 中的位置
         aPositionLocation = GLES20.glGetAttribLocation(program, A_POSITION)
 //        aColorLocation = GLES20.glGetAttribLocation(program, A_COLOR)
     }
 
     fun setUniforms(matrix: FloatArray, r: Float, g: Float, b: Float) {
         GLES20.glUniformMatrix4fv(uMatrixLocation, 1, false, matrix, 0)
+
+        // 更新 u_Color 值
         GLES20.glUniform4f(uColorLocation, r, g, b, 1f)
     }
 

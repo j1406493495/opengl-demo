@@ -5,12 +5,17 @@ import android.opengl.GLES20
 import com.blankj.utilcode.util.LogUtils
 
 object ShaderHelper {
-
-    fun compileVertexShader(shaderCode: String): Int {
+    /**
+     * 编译顶点着色器
+     */
+    private fun compileVertexShader(shaderCode: String): Int {
         return compileShader(GLES20.GL_VERTEX_SHADER, shaderCode)
     }
 
-    fun compileFragmentShader(shaderCode: String): Int {
+    /**
+     * 编译片段着色器
+     */
+    private fun compileFragmentShader(shaderCode: String): Int {
         return compileShader(GLES20.GL_FRAGMENT_SHADER, shaderCode)
     }
 
@@ -45,7 +50,7 @@ object ShaderHelper {
     /**
      * 链接着色器
      */
-    fun linkProgram(vertexShaderId: Int, fragmentShaderId: Int): Int {
+    private fun linkProgram(vertexShaderId: Int, fragmentShaderId: Int): Int {
         val programObjectId: Int = GLES20.glCreateProgram()
 
         if (programObjectId == 0) {
@@ -74,7 +79,7 @@ object ShaderHelper {
     /**
      * 检测 program 是否有效
      */
-    fun validateProgram(programObjectId: Int): Boolean {
+    private fun validateProgram(programObjectId: Int): Boolean {
         GLES20.glValidateProgram(programObjectId)
 
         val validateState = IntArray(1)
@@ -84,6 +89,10 @@ object ShaderHelper {
         return validateState[0] != 0
     }
 
+    /**
+     * 编译顶点着色器和片段着色器
+     * 将编译完成的顶点着色器和片段着色器链接成 opengl program
+     */
     fun buildProgram(vertexShaderSource: String, fragmentShaderSource: String): Int {
         // compile the shaders
         val vertexShader = compileVertexShader(vertexShaderSource)
