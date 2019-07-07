@@ -1,6 +1,6 @@
 attribute vec4 a_Position;
 //attribute vec4 a_Color;
-//varying vec4 v_Color;
+//varying vec4 v_Color; varying 属性用来混合颜色
 uniform mat4 u_Matrix;
 
 void main()
