@@ -365,6 +365,7 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         System.arraycopy(temp, 0, projectionMatrix, 0, temp.size)
 
 
+    // 正交矩阵，按比例转换为归一化坐标
 //        val aspectRatio = if (width > height) {
 //            width.toFloat() / height.toFloat()
 //        } else {
@@ -372,6 +373,7 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
 //        }
 //
 //        if (width > height) {
+            // 正交矩阵方法
 //            Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
 //        } else {
 //            Matrix.orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f)
