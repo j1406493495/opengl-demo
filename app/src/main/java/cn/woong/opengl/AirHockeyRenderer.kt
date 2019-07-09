@@ -382,6 +382,10 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
 
     override fun onDrawFrame(gl: GL10) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+
+        /**
+        * 将正交转换后的矩阵数据写入到 u_Matrix，用于变换 a_Position
+        **/
         GLES20.glUniformMatrix4fv(uMatrixLocation, 1, false, projectionMatrix, 0)
 
         /**
