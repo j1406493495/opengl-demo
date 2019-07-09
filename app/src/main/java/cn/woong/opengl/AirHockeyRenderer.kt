@@ -352,14 +352,19 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
 
+        // 投影矩阵
         MatrixHelper.perspectiveM(projectionMatrix, 50f,
                 width.toFloat() / height.toFloat(), 1f, 10f)
 
+        // 模型矩阵, 用来移动物体到视线范围内
         Matrix.setIdentityM(modelMatrix, 0)
 //        Matrix.translateM(modelMatrix, 0, 0f, 0f, -2f)
+        // 平移
         Matrix.translateM(modelMatrix, 0, 0f, 0f, -2.5f)
+        // 旋转成 3D 视图
         Matrix.rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f)
 
+        // 矩阵相乘
         val temp = FloatArray(16)
         Matrix.multiplyMM(temp, 0, projectionMatrix, 0, modelMatrix, 0)
         System.arraycopy(temp, 0, projectionMatrix, 0, temp.size)

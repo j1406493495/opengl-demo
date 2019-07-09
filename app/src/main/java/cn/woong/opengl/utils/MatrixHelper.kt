@@ -17,6 +17,7 @@ object MatrixHelper {
      * ]
      */
     fun perspectiveM(m: FloatArray, yFovInDegrees: Float, aspect: Float, n: Float, f: Float) {
+        // 计算焦距
         val angleInRadians: Float = ((yFovInDegrees * Math.PI) / 180).toFloat()
         val a: Float = (1.0 / Math.tan(angleInRadians / 2.0)).toFloat()
 
