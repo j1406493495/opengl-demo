@@ -9,7 +9,7 @@ import java.nio.FloatBuffer
 /**
  * @author Woong on 2019/6/3
  * @website http://woong.cn
- * 数据操作类，负责传输数据到本地内存
+ * 顶点数据操作类，负责传输数据到本地内存
  */
 class VertexArray(var vertexData: FloatArray) {
     private var floatBuffer: FloatBuffer

@@ -1,5 +1,5 @@
 precision mediump float;
-uniform sampler2D u_TextureUnit;
+uniform sampler2D u_TextureUnit;    // sampler2D 二维纹理数据的数组
 varying vec2 v_TextureCoordinates;
 
 void main() {

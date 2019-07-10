@@ -35,6 +35,9 @@ class Table {
         vertexArray = VertexArray(VERTEX_DATA)
     }
 
+    /**
+     * 绑定顶点数据与着色器
+     */
     fun bindData(textureProgram: TextureShaderProgram) {
         vertexArray.setVertexAttribPointer(0, textureProgram.getPositionAttributeLocation(),
                 POSITION_COMPONENT_COUNT, STRIDE)
