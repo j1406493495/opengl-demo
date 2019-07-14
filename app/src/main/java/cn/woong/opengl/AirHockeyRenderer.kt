@@ -38,6 +38,7 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
     private val farBound = -0.8f
     private val nearBound = 0.8f
     private lateinit var previousBlueMalletPosition: Geometry.Point
+    // 速度和方向
     private lateinit var puckPosition: Geometry.Point
     private lateinit var puckVector: Geometry.Vector
 
@@ -109,6 +110,8 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         puckVector = puckVector.scale(0.99f)
 
         Matrix.multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
+
+        // 反转矩阵，用来将二维点转换成两个三维坐标
         Matrix.invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0)
 
         positionTableInScene()
@@ -206,6 +209,7 @@ class AirHockeyRenderer(private val context: Context) : GLSurfaceView.Renderer {
         Matrix.multiplyMV(farPointWorld, 0, invertedViewProjectionMatrix,
                 0, farPointNdc, 0)
 
+        // 撤销透视除法的影响
         divideByW(nearPointWorld)
         divideByW(farPointWorld)
 

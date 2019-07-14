@@ -24,6 +24,7 @@ class Geometry {
 
     class Cylinder(var center: Point, var radius: Float, var height: Float)
 
+    // 射线类，点击事件的二维点通过射线转换为两个三维点
     class Ray(var point: Point, var vector: Vector)
 
     class Vector(var x: Float, var y: Float, var z: Float) {
